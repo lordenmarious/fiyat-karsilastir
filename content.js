@@ -1,8 +1,11 @@
 // Content script for Akakçe Hover Extension v2.2
-// Multi-site support with Favorites
+// Cross-browser compatible (Firefox & Chrome)
 
 (function () {
     'use strict';
+
+    // Cross-browser API
+    const api = typeof browser !== 'undefined' ? browser : chrome;
 
     let currentTitle = "";
     let tooltipContainer = null;
@@ -66,8 +69,8 @@
         });
         observer.observe(document.body, { childList: true, subtree: true });
 
-        if (typeof browser !== 'undefined' && browser.runtime) {
-            browser.runtime.onMessage.addListener((request) => {
+        if (api && api.runtime) {
+            api.runtime.onMessage.addListener((request) => {
                 if (request.action === "OPEN_AKAKCE") {
                     triggerAkakceSearch();
                 }
@@ -174,7 +177,7 @@
         }
 
         // Check if already favorite
-        browser.runtime.sendMessage({
+        api.runtime.sendMessage({
             action: "IS_FAVORITE",
             title: fullTitle
         }).then((response) => {
@@ -202,11 +205,11 @@
         btn.onclick = () => {
             if (btn.classList.contains('is-favorite')) {
                 // Remove from favorites
-                browser.runtime.sendMessage({
+                api.runtime.sendMessage({
                     action: "IS_FAVORITE",
                     title: fullTitle
                 }).then((r) => {
-                    browser.runtime.sendMessage({
+                    api.runtime.sendMessage({
                         action: "REMOVE_FAVORITE",
                         id: r.id
                     }).then(() => {
@@ -215,7 +218,7 @@
                 });
             } else {
                 // Add to favorites
-                browser.runtime.sendMessage({
+                api.runtime.sendMessage({
                     action: "ADD_FAVORITE",
                     product: {
                         title: fullTitle,

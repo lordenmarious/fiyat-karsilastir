@@ -1,5 +1,8 @@
 /* Shared utility functions */
 
+// Cross-browser API compatibility
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
 /**
  * Cleans the product title to improve Akakçe search results.
  */

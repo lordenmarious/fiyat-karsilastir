@@ -1,12 +1,15 @@
 // Background script for Akakçe Hover Extension v2.2
-// Handles favorites with persistent storage
+// Cross-browser compatible (Firefox & Chrome)
+
+// Cross-browser API
+const api = typeof browser !== 'undefined' ? browser : chrome;
 
 // Load favorites from storage on startup
 let favorites = {};
 
 async function loadFavorites() {
     try {
-        const result = await browser.storage.local.get({ favorites: {} });
+        const result = await api.storage.local.get({ favorites: {} });
         favorites = result.favorites || {};
         console.log("Akakce: Loaded favorites:", Object.keys(favorites).length);
     } catch (e) {
@@ -17,7 +20,7 @@ async function loadFavorites() {
 
 async function saveFavorites() {
     try {
-        await browser.storage.local.set({ favorites });
+        await api.storage.local.set({ favorites });
         console.log("Akakce: Saved favorites:", Object.keys(favorites).length);
     } catch (e) {
         console.error("Akakce: Error saving favorites:", e);
@@ -28,18 +31,18 @@ async function saveFavorites() {
 loadFavorites();
 
 // Handle keyboard shortcut (Alt+A)
-browser.commands.onCommand.addListener((command) => {
+api.commands.onCommand.addListener((command) => {
     if (command === "open-akakce") {
-        browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+        api.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
             if (tabs[0]) {
-                browser.tabs.sendMessage(tabs[0].id, { action: "OPEN_AKAKCE" });
+                api.tabs.sendMessage(tabs[0].id, { action: "OPEN_AKAKCE" });
             }
         });
     }
 });
 
 // Handle messages
-browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+api.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "ADD_FAVORITE") {
         const id = generateId(request.product.title);
         favorites[id] = {
@@ -94,4 +97,4 @@ function generateId(title) {
     return 'fav_' + Math.abs(hash).toString(36);
 }
 
-console.log("Akakce Hover background script loaded v2.2");
+console.log("Akakce Hover background script loaded v2.2 (cross-browser)");

@@ -1,4 +1,7 @@
 // Favorites Popup Script
+// Cross-browser compatible
+
+const api = typeof browser !== 'undefined' ? browser : chrome;
 
 const listEl = document.getElementById('list');
 const emptyEl = document.getElementById('empty');
@@ -7,7 +10,7 @@ const countEl = document.getElementById('count');
 document.addEventListener('DOMContentLoaded', loadFavorites);
 
 function loadFavorites() {
-    browser.runtime.sendMessage({ action: "GET_FAVORITES" }).then((response) => {
+    api.runtime.sendMessage({ action: "GET_FAVORITES" }).then((response) => {
         if (response && response.favorites) {
             renderFavorites(response.favorites);
         }
@@ -43,7 +46,7 @@ function renderFavorites(favorites) {
             const id = el.parentElement.dataset.id;
             const item = favorites[id];
             if (item) {
-                browser.tabs.create({
+                api.tabs.create({
                     url: `https://www.akakce.com/arama/?q=${encodeURIComponent(item.searchQuery)}`
                 });
             }
@@ -55,7 +58,7 @@ function renderFavorites(favorites) {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const id = btn.dataset.id;
-            browser.runtime.sendMessage({ action: "REMOVE_FAVORITE", id }).then(() => {
+            api.runtime.sendMessage({ action: "REMOVE_FAVORITE", id }).then(() => {
                 loadFavorites();
             });
         });

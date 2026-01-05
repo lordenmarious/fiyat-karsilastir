@@ -1,9 +1,10 @@
 # Akakçe Hover Price
 
-A Firefox browser extension that shows price comparisons from [Akakçe.com](https://akakce.com) on Turkish e-commerce sites.
+A browser extension that shows price comparisons from [Akakçe.com](https://akakce.com) on Turkish e-commerce sites.
 
 ![Version](https://img.shields.io/badge/version-2.2-blue)
 ![Firefox](https://img.shields.io/badge/Firefox-Manifest%20V3-orange)
+![Chrome](https://img.shields.io/badge/Chrome-Manifest%20V3-green)
 
 ## Features
 
