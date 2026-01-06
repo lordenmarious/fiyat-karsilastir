@@ -5,7 +5,8 @@
   "description": "Compare prices on Akakçe.com from Amazon, Trendyol, and more",
   "browser_specific_settings": {
     "gecko": {
-      "id": "akakce-hover@extension.local"
+      "id": "akakce-hover@extension.local",
+      "strict_min_version": "109.0"
     }
   },
   "permissions": [
@@ -45,7 +46,11 @@
   },
   "action": {
     "default_popup": "favorites.html",
-    "default_icon": "icon.png",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
     "default_title": "Favoriler"
   },
   "commands": {
@@ -57,6 +62,8 @@
     }
   },
   "icons": {
-    "48": "icon.png"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 }
