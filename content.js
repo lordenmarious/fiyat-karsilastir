@@ -23,20 +23,38 @@
         'amazon.com.tr': {
             productTitle: '#productTitle',
             productImage: '#landingImage, #imgBlkFront',
-            listingItem: '.s-result-item[data-asin], .s-result-item.s-asin',
-            listingTitle: 'h2 a, .a-link-normal .a-text-normal'
+            listingItem: '.s-result-item[data-asin], .a-carousel-card, .deal-tile, .bxc-grid__column .a-card-ui',
+            listingTitle: 'h2 a, .a-link-normal .a-text-normal, .deal-title, .a-truncate-cut'
         },
         'trendyol.com': {
             productTitle: 'h1.product-title, h1.pr-new-br, h1[class*="product"]',
             productImage: '.product-image, .product-container img, .gallery-container img',
-            listingItem: '.p-card-wrppr, [data-id]',
-            listingTitle: '.prdct-desc-cntnr-name span'
+            listingItem: '.p-card-wrppr, [data-id], .widget-product',
+            listingTitle: '.prdct-desc-cntnr-name span, .product-name'
         },
         'hepsiburada.com': {
             productTitle: 'h1',
             productImage: 'img[data-img-name="product-image"], .product-image-wrapper img, img[data-test-id="main-product-image"]',
-            listingItem: '[data-test-id="product-card"]',
+            listingItem: '[data-test-id="product-card"], .productListContent-item',
             listingTitle: 'h3, [data-test-id="product-card-name"]'
+        },
+        'itopya.com': {
+            productTitle: '#product-details h1, .product-details-title', // Removed generic h1
+            productImage: '.swiper-slide-active img, #product-details img',
+            listingItem: '.product-block, .product-item, .slider-item',
+            listingTitle: '.title, .product-name'
+        },
+        'vatanbilgisayar.com': {
+            productTitle: 'h1.product-list__product-name',
+            productImage: '.swiper-slide-active img, .wrapper-main-slider__image',
+            listingItem: '.product-list, .swiper-slide .product-list',
+            listingTitle: '.product-list__product-name, h3'
+        },
+        'teknosa.com': {
+            productTitle: 'h1.pdp-title',
+            productImage: '#pdp-gallery .swiper-slide-active img',
+            listingItem: '.product-item, .pds, .owl-item .product-item',
+            listingTitle: '.prd-title-m'
         }
     };
 
@@ -61,14 +79,21 @@
     }
 
     function onReady() {
-        setTimeout(() => {
-            setupListingHovers();
-            checkProduct();
-        }, 2000);
+        // Debug log to verify injection
+        console.log('[Fiyat Karşılaştır] Content script started for:', siteName);
 
+        // Initial check with extended retry
+        checkProductWithRetry(0);
+        setupListingHovers();
+
+        // Mutation observer for SPA changes (Debounced)
+        let observerTimeout;
         const observer = new MutationObserver(() => {
-            setupListingHovers();
-            checkProduct();
+            clearTimeout(observerTimeout);
+            observerTimeout = setTimeout(() => {
+                setupListingHovers();
+                checkProduct();
+            }, 500); // 500ms debounce
         });
         observer.observe(document.body, { childList: true, subtree: true });
 
@@ -114,6 +139,17 @@
         });
     }
 
+    function checkProductWithRetry(attempt) {
+        if (attempt > 5) return; // Stop after 5 attempts (approx 2.5 sec)
+
+        const titleEl = document.querySelector(config.productTitle);
+        if (titleEl && titleEl.innerText.trim().length > 0) {
+            checkProduct();
+        } else {
+            setTimeout(() => checkProductWithRetry(attempt + 1), 500);
+        }
+    }
+
     function checkProduct() {
         const titleEl = document.querySelector(config.productTitle);
         if (!titleEl) return;
@@ -129,7 +165,9 @@
     function triggerSearch() {
         const titleEl = document.querySelector(config.productTitle);
         if (titleEl) {
-            const url = `https://www.akakce.com/arama/?q=${encodeURIComponent(cleanProductTitle(titleEl.innerText.trim()))}`;
+            const query = cleanProductTitle(titleEl.innerText.trim());
+            // Removed &hp_popup=1 for native view
+            const url = `https://www.akakce.com/arama/?q=${encodeURIComponent(query)}`;
             openPopup(url);
         }
     }
@@ -138,9 +176,10 @@
         if (!searchQuery) return;
 
         // Cleanup old elements if they exist
-        const oldContainer = document.getElementById('akakce-buttons');
+        const oldContainer = document.getElementById('hp-buttons');
         if (oldContainer) oldContainer.remove();
 
+        // Removed &hp_popup=1 for native view
         const searchUrl = `https://www.akakce.com/arama/?q=${encodeURIComponent(searchQuery)}`;
 
         // Create container
@@ -252,6 +291,7 @@
         const oldTooltip = document.getElementById('akakce-tooltip');
         if (oldTooltip) oldTooltip.remove();
 
+        // Removed &hp_popup=1 for native view
         const searchUrl = `https://www.akakce.com/arama/?q=${encodeURIComponent(cleanProductTitle(query))}`;
 
         let div = document.getElementById('hp-tooltip');
@@ -278,12 +318,17 @@
     }
 
     function openPopup(url) {
-        const width = SETTINGS.popupWidth;
-        const height = SETTINGS.popupHeight;
+        const width = 420; // Stable mobile-friendly width
+        const height = 750;
         const left = window.screenX + window.outerWidth - width - 50;
-        const top = window.screenY + 100;
+        const top = window.screenY + 50;
 
-        if (externalPopup && !externalPopup.closed) externalPopup.close();
+        // If popup is already open, update its URL instead of closing/reopening
+        if (externalPopup && !externalPopup.closed) {
+            externalPopup.location.href = url;
+            externalPopup.focus();
+            return;
+        }
 
         externalPopup = window.open(url, 'PriceComparisonPopup',
             `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);

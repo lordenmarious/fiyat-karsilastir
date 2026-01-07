@@ -25,7 +25,7 @@ Before starting ANY work on this project, always follow this workflow:
 ### Architecture
 - **Popup Window Mode**: Opens Akakçe in a popup (bypasses bot detection)
 - NO direct scraping (bot protection blocks it)
-- Settings stored in `chrome.storage.sync`
+- Settings stored in `browser.storage.sync`
 
 ---
 

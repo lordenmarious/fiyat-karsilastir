@@ -19,14 +19,20 @@
     "*://*.amazon.com.tr/*",
     "*://*.trendyol.com/*",
     "*://*.hepsiburada.com/*",
-    "*://*.akakce.com/*"
+    "*://*.akakce.com/*",
+    "*://*.itopya.com/*",
+    "*://*.vatanbilgisayar.com/*",
+    "*://*.teknosa.com/*"
   ],
   "content_scripts": [
     {
       "matches": [
         "*://*.amazon.com.tr/*",
         "*://www.trendyol.com/*",
-        "*://www.hepsiburada.com/*"
+        "*://www.hepsiburada.com/*",
+        "*://*.itopya.com/*",
+        "*://*.vatanbilgisayar.com/*",
+        "*://*.teknosa.com/*"
       ],
       "js": [
         "utils.js",
@@ -40,7 +46,9 @@
     }
   ],
   "background": {
-    "service_worker": "background.js"
+    "scripts": [
+      "background.js"
+    ]
   },
   "action": {
     "default_popup": "popup.html",

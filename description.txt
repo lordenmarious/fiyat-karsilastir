@@ -3,7 +3,7 @@ Hover Price Comparison Project Description
 Bu eklenti, popüler alışveriş sitelerinde (Amazon, Trendyol, Hepsiburada) gezerken ürünlerin diğer platformlardaki fiyatlarını ve karşılaştırmalarını görmenizi sağlar.
 
 Özellikler:
-- Sayfa üzerinde otomatik fiyat arama / karşılaştırma.
+- Sayfa üzerinde otomatik fiyat arama / karşılaştırma (Amazon, Trendyol, Hepsiburada, Itopya, Vatan, Teknosa).
 - Ürünleri favorilere ekleme (Ürün fotoğrafı ile birlikte).
 - Favorilerim sayfası (Yeni sekmede açılır, Liste ve Izgara görünümü destekler).
 - Favori kartlarında Fiyat Karşılaştırma ve Orijinal Mağaza linkleri.
@@ -11,9 +11,9 @@ Bu eklenti, popüler alışveriş sitelerinde (Amazon, Trendyol, Hepsiburada) ge
 - Tamamen marka bağımsız ve güvenli arayüz.
 
 Teknik Detaylar:
-- Manifest V3 mimarisi.
-- Chrome ve Firefox (Zen dahil) tam uyumluluk (Service Worker entegrasyonu).
-- Arka plan mesajlaşma sistemi Chrome MV3 standartlarına göre optimize edildi.
+- Manifest V3 mimarisi kullanıldı.
+- Firefox/Zen uyumluluğu için "background.scripts" (Event Pages) kullanılmaktadır.
+- Arka plan sistemi MV3 standartlarına göre optimize edildi.
 - HTML/CSS/Vanilla JS ile geliştirildi.
-- Google Gemini API (normalizasyon için) entegrasyonu mevcuttur.
+- Hibrit Normalleştirme Sistemi (Platforma özel gürültü temizleme ve birim koruma).
 - Otomatik eski sürüm temizleme sistemi.
