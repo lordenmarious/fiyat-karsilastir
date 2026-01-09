@@ -58,11 +58,11 @@
         },
         'incehesap.com': {
             productTitle: 'h1',
-            productImage: '.swiper-slide-active img, .product-image img',
-            listingItem: 'a.product',
-            listingTitle: 'div.text-sm.font-semibold, [title]',
-            // Gaming Gecesi sayası için özel: ürün başlığı a.product'un title attribute'unda
-            useTitleAttribute: true
+            productImage: 'img.zoomImageThumb, .swiper-slide-active img',
+            // Dual selector: kategori sayfaları + Gaming Gecesi kampanya sayfası
+            listingItem: 'a.product, a.h-full.block.relative[href*="-fiyati-"]',
+            listingTitle: 'p.font-semibold',
+            useTitleAttribute: true // Kategori sayfalarında title attribute öncelikli
         }
     };
 
@@ -124,10 +124,13 @@
             item.addEventListener('mouseenter', () => {
                 let title = '';
 
-                // İncehesap için: title attribute'dan al
+                // Önce title attribute'u kontrol et (kategori sayfaları için)
                 if (config.useTitleAttribute && item.hasAttribute('title')) {
                     title = item.getAttribute('title').trim();
-                } else {
+                }
+
+                // Fallback: Gaming Gecesi için nested p tag veya listingTitle seçicisi
+                if (!title) {
                     const titleEl = item.querySelector(config.listingTitle);
                     if (titleEl && titleEl.innerText) {
                         title = titleEl.innerText.trim();
