@@ -8,6 +8,10 @@ Bu eklenti, popüler alışveriş sitelerinde (Amazon, Trendyol, Hepsiburada) ge
 - Akıllı Kategori Filtreleme: İşlemci, ekran kartı, RAM vb. ürünler otomatik kategorilenir.
 - Ürünleri favorilere ekleme (Ürün fotoğrafı ile birlikte).
 - Favorilerim sayfası (Yeni sekmede açılır, Liste ve Izgara görünümü destekler).
+- Gelişmiş Filtreleme: Tarihe, isme veya siteye göre sıralama.
+- Hızlı Arama: Favorilerde anlık ürün arama.
+- Karanlık Mod: Sistem tercihine göre otomatik veya manuel tema seçimi.
+- Hoş Geldin Sayfası: Yeni kullanıcılar için özellik tanıtımı ve kısayol rehberi.
 - Favori kartlarında Fiyat Karşılaştırma ve Orijinal Mağaza linkleri.
 - Alt+A klavye kısayolu ile hızlı arama.
 - Tamamen marka bağımsız ve güvenli arayüz.

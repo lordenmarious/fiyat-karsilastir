@@ -24,45 +24,109 @@
             productTitle: '#productTitle',
             productImage: '#landingImage, #imgBlkFront',
             listingItem: '.s-result-item[data-asin], .a-carousel-card, .deal-tile, .bxc-grid__column .a-card-ui',
-            listingTitle: 'h2 a, .a-link-normal .a-text-normal, .deal-title, .a-truncate-cut'
+            listingTitle: 'h2 a, .a-link-normal .a-text-normal, .deal-title, .a-truncate-cut',
+            isListingPage: () => {
+                const path = window.location.pathname;
+                const search = window.location.search;
+                // Arama sayfaları (/s?k=...), deal sayfaları, bestseller, new releases
+                if (path === '/s' || path.startsWith('/s/') || search.includes('k=')) return true;
+                if (path.includes('/deals') || path.includes('/bestsellers') || path.includes('/new-releases')) return true;
+                // Ürün sayfası /dp/ veya /gp/product/ içerir
+                if (path.includes('/dp/') || path.includes('/gp/product/')) return false;
+                return false;
+            }
         },
         'trendyol.com': {
             productTitle: 'h1.product-title, h1.pr-new-br, h1[class*="product"]',
             productImage: '.product-image, .product-container img, .gallery-container img',
             listingItem: '.p-card-wrppr, [data-id], .widget-product',
-            listingTitle: '.prdct-desc-cntnr-name span, .product-name'
+            listingTitle: '.prdct-desc-cntnr-name span, .product-name',
+            isListingPage: () => {
+                const path = window.location.pathname;
+                // Ürün sayfası: /marka/urun-adi-p-12345 formatında
+                if (path.match(/-p-\d+$/)) return false;
+                // Diğer her şey listeleme
+                return true;
+            }
         },
         'hepsiburada.com': {
             productTitle: 'h1',
             productImage: 'img[data-img-name="product-image"], .product-image-wrapper img, img[data-test-id="main-product-image"]',
             listingItem: '[data-test-id="product-card"], .productListContent-item',
-            listingTitle: 'h3, [data-test-id="product-card-name"]'
+            listingTitle: 'h3, [data-test-id="product-card-name"]',
+            isListingPage: () => {
+                const path = window.location.pathname;
+                // Arama sayfası /ara?q=...
+                if (path.startsWith('/ara')) return true;
+                // Kategori sayfaları
+                if (path.includes('/kategori/') || path.includes('/butik/')) return true;
+                // Ürün sayfası: /-p- içeren URL'ler
+                if (path.includes('-p-')) return false;
+                return false;
+            }
         },
         'itopya.com': {
-            productTitle: '#product-details h1, .product-details-title', // Removed generic h1
+            productTitle: '#product-details h1, .product-details-title',
             productImage: '.swiper-slide-active img, #product-details img',
             listingItem: '.product-block, .product-item, .slider-item',
-            listingTitle: '.title, .product-name'
+            listingTitle: '.title, .product-name',
+            isListingPage: () => {
+                const path = window.location.pathname;
+                // Arama sayfası
+                if (path.includes('/arama') || path.includes('/search')) return true;
+                // Kategori sayfaları
+                if (path.includes('/kategori/') || path.includes('/urunler/')) return true;
+                // Ürün sayfası genellikle /urun/ içerir veya product-details elementi vardır
+                if (document.querySelector('#product-details')) return false;
+                return true;
+            }
         },
         'vatanbilgisayar.com': {
             productTitle: 'h1.product-list__product-name',
             productImage: '.swiper-slide-active img, .wrapper-main-slider__image',
             listingItem: '.product-list, .swiper-slide .product-list',
-            listingTitle: '.product-list__product-name, h3'
+            listingTitle: '.product-list__product-name, h3',
+            isListingPage: () => {
+                const path = window.location.pathname;
+                // Arama ve kategori sayfaları
+                if (path.includes('/arama/') || path.includes('/kategori/')) return true;
+                // Ürün sayfası genellikle product-id ile biter veya ürün detayları içerir
+                if (document.querySelector('.product-list__content')) return false;
+                return true;
+            }
         },
         'teknosa.com': {
             productTitle: 'h1.pdp-title',
             productImage: '#pdp-gallery .swiper-slide-active img',
             listingItem: '.product-item, .pds, .owl-item .product-item',
-            listingTitle: '.prd-title-m'
+            listingTitle: '.prd-title-m',
+            isListingPage: () => {
+                const path = window.location.pathname;
+                // Arama ve kategori sayfaları
+                if (path.includes('/arama') || path.includes('/kategori/')) return true;
+                // Ürün sayfası: pdp-title elementi varsa detay sayfasıdır
+                if (document.querySelector('h1.pdp-title')) return false;
+                return true;
+            }
         },
         'incehesap.com': {
             productTitle: 'h1',
             productImage: 'img.zoomImageThumb, .swiper-slide-active img',
-            // Dual selector: kategori sayfaları + Gaming Gecesi kampanya sayfası
             listingItem: 'a.product, a.h-full.block.relative[href*="-fiyati-"]',
             listingTitle: 'p.font-semibold',
-            useTitleAttribute: true // Kategori sayfalarında title attribute öncelikli
+            useTitleAttribute: true,
+            isListingPage: () => {
+                const path = window.location.pathname;
+                // Gaming gecesi, kampanya sayfaları, kategori sayfaları
+                if (path.includes('gaming-geceleri') || path.includes('kampanya') || path.includes('kategori')) {
+                    return true;
+                }
+                // URL içinde "-fiyati-" yoksa liste sayfasıdır
+                if (!path.includes('-fiyati-')) {
+                    return true;
+                }
+                return false;
+            }
         }
     };
 
@@ -144,10 +208,19 @@
                     if (lastHoveredItem === title) return;
                     lastHoveredItem = title;
 
-                    const rect = item.getBoundingClientRect();
+                    // Find the best element for positioning (image or title)
+                    let targetEl = item.querySelector('img');
+                    if (!targetEl) {
+                        targetEl = item.querySelector(config.listingTitle);
+                    }
+                    if (!targetEl) {
+                        targetEl = item;
+                    }
+
+                    const rect = targetEl.getBoundingClientRect();
                     showTooltip(title, {
-                        x: rect.left + window.scrollX,
-                        y: rect.bottom + window.scrollY + 8
+                        x: rect.left,
+                        y: rect.bottom + 8
                     });
                 }, SETTINGS.hoverDelay);
             });
@@ -170,6 +243,12 @@
     }
 
     function checkProduct() {
+        // Listeleme sayfalarında floating button gösterme
+        if (config.isListingPage && config.isListingPage()) {
+            console.log('[Fiyat Karşılaştır] Listing page detected, skipping floating button');
+            return;
+        }
+
         const titleEl = document.querySelector(config.productTitle);
         if (!titleEl) return;
 

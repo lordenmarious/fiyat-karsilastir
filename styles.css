@@ -76,7 +76,7 @@
 
 /* Tooltip Search */
 .hp-tooltip {
-    position: absolute;
+    position: fixed;
     z-index: 2147483647;
     background: var(--hp-primary);
     color: var(--hp-text-white);

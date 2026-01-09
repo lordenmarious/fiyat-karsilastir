@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoş Geldiniz - Fiyat Karşılaştır</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #064E3B;
+            --primary-light: #10B981;
+            --primary-bg: #ecfdf5;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --accent: #FDB022;
+            --shadow-lg: 0 10px 40px -10px rgba(0, 0, 0, 0.15);
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 50%, #f0f9ff 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .logo-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 20px 40px -10px rgba(6, 78, 59, 0.4);
+            margin-bottom: 28px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .logo-wrapper span {
+            font-size: 48px;
+            color: white;
+            font-weight: 700;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary-light);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--primary-bg);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .feature-card p {
+            font-size: 15px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Shortcut Section */
+        .shortcut-section {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 48px;
+            text-align: center;
+        }
+
+        .shortcut-section h2 {
+            font-size: 24px;
+            margin-bottom: 24px;
+            color: var(--text-main);
+        }
+
+        .shortcut-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px -5px rgba(6, 78, 59, 0.4);
+        }
+
+        .shortcut-badge kbd {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .shortcut-description {
+            margin-top: 16px;
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        /* Sites Grid */
+        .sites-section {
+            margin-bottom: 48px;
+        }
+
+        .sites-section h2 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 24px;
+            color: var(--text-main);
+        }
+
+        .sites-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .site-badge {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .site-badge:hover {
+            border-color: var(--primary);
+            background: var(--primary-bg);
+        }
+
+        .site-badge span {
+            font-size: 18px;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            padding: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .cta-section h2 {
+            font-size: 28px;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .cta-section p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            color: var(--primary);
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 48px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .container {
+                padding: 40px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Hero -->
+        <div class="hero">
+            <div class="logo-wrapper">
+                <span>F</span>
+            </div>
+            <h1>Fiyat Karşılaştır'a Hoş Geldiniz!</h1>
+            <p>Artık Amazon, Trendyol, Hepsiburada ve daha fazla sitede en iyi fiyatları tek tuşla bulabilirsiniz.</p>
+        </div>
+
+        <!-- Features -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3>Anlık Fiyat Karşılaştırma</h3>
+                <p>Ürün sayfasında sağ altta beliren butona tıklayarak Akakçe üzerinden tüm fiyatları görün.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⭐</div>
+                <h3>Favori Ürünler</h3>
+                <p>Beğendiğiniz ürünleri kaydedin ve istediğiniz zaman kendi panelizden erişin.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌙</div>
+                <h3>Karanlık Mod</h3>
+                <p>Göz yormayan karanlık tema ile gece alışverişi yapın. Sistem ayarlarınıza göre otomatik geçiş.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔎</div>
+                <h3>Hızlı Arama</h3>
+                <p>Favorileriniz arasında anlık arama yapın ve sırala ile istediğiniz ürünü hemen bulun.</p>
+            </div>
+        </div>
+
+        <!-- Keyboard Shortcut -->
+        <div class="shortcut-section">
+            <h2>⌨️ Klavye Kısayolu</h2>
+            <div class="shortcut-badge">
+                <kbd>Alt</kbd> + <kbd>A</kbd>
+            </div>
+            <p class="shortcut-description">Herhangi bir ürün sayfasında bu kısayolu kullanarak anında fiyat
+                karşılaştırma penceresini açın.</p>
+        </div>
+
+        <!-- Supported Sites -->
+        <div class="sites-section">
+            <h2>🛒 Desteklenen Siteler</h2>
+            <div class="sites-grid">
+                <div class="site-badge"><span>🅰️</span> Amazon.com.tr</div>
+                <div class="site-badge"><span>🟠</span> Trendyol</div>
+                <div class="site-badge"><span>🛍️</span> Hepsiburada</div>
+                <div class="site-badge"><span>🖥️</span> Itopya</div>
+                <div class="site-badge"><span>💻</span> Vatan Bilgisayar</div>
+                <div class="site-badge"><span>📱</span> Teknosa</div>
+                <div class="site-badge"><span>🎮</span> İncehesap</div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <h2>🚀 Başlamaya Hazır mısınız?</h2>
+            <p>Desteklenen sitelerden birine gidin ve bir ürün sayfası açın!</p>
+            <button class="cta-button" id="close-onboarding">
+                <span>✨</span> Haydi Başlayalım!
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Fiyat Karşılaştır v2.3 • <a href="#" id="open-favorites">Favorilere Git</a></p>
+        </div>
+    </div>
+
+    <script>
+        const api = typeof browser !== 'undefined' ? browser : chrome;
+
+        // Mark onboarding as seen
+        api.storage.local.set({ onboardingSeen: true });
+
+        // Close onboarding button
+        document.getElementById('close-onboarding').addEventListener('click', () => {
+            window.close();
+        });
+
+        // Open favorites link
+        document.getElementById('open-favorites').addEventListener('click', (e) => {
+            e.preventDefault();
+            api.tabs.create({ url: api.runtime.getURL('favorites.html') });
+            window.close();
+        });
+    </script>
+</body>
+
+</html>

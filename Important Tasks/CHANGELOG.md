@@ -2,6 +2,24 @@
 
 All notable changes to the **Fiyat Karşılaştır** extension will be documented in this file.
 
+## [2.3.0] - 2026-01-10
+### Added
+- **Advanced Filtering**: Sort favorites by Date (Newest/Oldest), Name (A-Z/Z-A), or Site in the Dashboard.
+- **Quick Search**: Live search bar in the Dashboard for instant product filtering with debounced input.
+- **Dark Mode**: Native dark/light theme support with persistent preference saving and system preference detection.
+- **Onboarding Experience**: Beautiful welcome page for new users with feature highlights, keyboard shortcuts, and supported sites.
+- **İncehesap.com Integration**: Full support for product pages, category listings, and Gaming Gecesi campaign pages.
+- **Listing Page Detection**: Smart detection of listing/search pages across ALL platforms (Amazon, Trendyol, Hepsiburada, Itopya, Vatan, Teknosa, İncehesap) - shows hover tooltip on listings, main buttons on product detail pages.
+
+### Improved
+- **Dashboard UX**: Theme toggle button with smooth hover animations.
+- **Search Filtering**: Clear button with visual feedback for easy query reset.
+- **Responsive Controls**: Unified controls wrapper for sort, view, and theme options.
+
+### Technical
+- **CSS Variables**: Implemented CSS custom properties for seamless theme switching.
+- **State Persistence**: Sort order, view mode, and theme preferences saved to browser storage.
+
 ## [2.2.0] - 2026-01-06
 ### Added
 - **Full Branding Refresh**: Renamed extension to "Fiyat Karşılaştır" for a more professional and independent brand identity.

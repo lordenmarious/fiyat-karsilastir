@@ -7,6 +7,8 @@ const api = typeof browser !== 'undefined' ? browser : chrome;
 
 // State
 let currentView = 'list';
+let currentSort = 'date-desc';
+let searchQuery = '';
 let favoritesData = {};
 
 // Elements
@@ -15,61 +17,160 @@ const emptyState = document.getElementById('empty-state');
 const countText = document.getElementById('count-text');
 const listViewBtn = document.getElementById('list-view-btn');
 const gridViewBtn = document.getElementById('grid-view-btn');
+const sortSelect = document.getElementById('sort-select');
+const searchInput = document.getElementById('search-input');
+const clearSearchBtn = document.getElementById('clear-search');
+
+// Debounce utility
+function debounce(fn, delay) {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn(...args), delay);
+    };
+}
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     loadSettings();
     loadFavorites();
-});
 
-// View Switching
-listViewBtn.addEventListener('click', () => setView('list'));
-gridViewBtn.addEventListener('click', () => setView('grid'));
-
-function setView(view) {
-    currentView = view;
-    container.className = `${view}-container`;
-
-    listViewBtn.classList.toggle('active', view === 'list');
-    gridViewBtn.classList.toggle('active', view === 'grid');
-
-    api.storage.local.set({ favoritesView: view });
-    renderFavorites(favoritesData);
-}
-
-function loadSettings() {
-    api.storage.local.get({ favoritesView: 'list' }).then(result => {
-        if (result.favoritesView) {
-            setView(result.favoritesView);
-        }
+    // Sort change handler
+    sortSelect.addEventListener('change', (e) => {
+        currentSort = e.target.value;
+        api.storage.local.set({ favoritesSort: currentSort });
+        renderFavorites(favoritesData);
     });
-}
 
-function loadFavorites() {
-    api.runtime.sendMessage({ action: "GET_FAVORITES" }).then((response) => {
-        if (response && response.favorites) {
-            favoritesData = response.favorites;
-            renderFavorites(favoritesData);
-        }
-    }).catch(err => {
-        console.error('Favorites loading failed:', err);
+    // Search handlers
+    const debouncedSearch = debounce(() => {
+        searchQuery = searchInput.value.trim().toLowerCase();
+        clearSearchBtn.style.display = searchQuery ? 'flex' : 'none';
+        renderFavorites(favoritesData);
+    }, 200);
+
+    searchInput.addEventListener('input', debouncedSearch);
+
+    clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        searchQuery = '';
+        clearSearchBtn.style.display = 'none';
+        renderFavorites(favoritesData);
+        searchInput.focus();
     });
-}
 
-function renderFavorites(favorites) {
-    const items = Object.values(favorites).sort((a, b) => b.addedAt - a.addedAt);
-    countText.textContent = `${items.length} adet kayıtlı ürün bulundu`;
+    // Theme toggle handlers
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
 
-    if (items.length === 0) {
-        emptyState.style.display = 'block';
-        container.style.display = 'none';
-        return;
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        api.storage.local.set({ theme: theme });
     }
 
-    emptyState.style.display = 'none';
-    container.style.display = currentView === 'list' ? 'flex' : 'grid';
+    // Load saved theme or use system preference
+    api.storage.local.get({ theme: null }).then(result => {
+        if (result.theme) {
+            setTheme(result.theme);
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            setTheme('dark');
+        }
+    }).catch(() => {
+        // Fallback for non-extension context
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            setTheme('dark');
+        }
+    });
 
-    container.innerHTML = items.map(item => `
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+    });
+
+    // View Switching
+    listViewBtn.addEventListener('click', () => setView('list'));
+    gridViewBtn.addEventListener('click', () => setView('grid'));
+
+    function setView(view) {
+        currentView = view;
+        container.className = `${view}-container`;
+
+        listViewBtn.classList.toggle('active', view === 'list');
+        gridViewBtn.classList.toggle('active', view === 'grid');
+
+        api.storage.local.set({ favoritesView: view });
+        renderFavorites(favoritesData);
+    }
+
+    function loadSettings() {
+        api.storage.local.get({ favoritesView: 'list', favoritesSort: 'date-desc' }).then(result => {
+            if (result.favoritesView) {
+                setView(result.favoritesView);
+            }
+            if (result.favoritesSort) {
+                currentSort = result.favoritesSort;
+                sortSelect.value = currentSort;
+            }
+        });
+    }
+
+    function loadFavorites() {
+        api.runtime.sendMessage({ action: "GET_FAVORITES" }).then((response) => {
+            if (response && response.favorites) {
+                favoritesData = response.favorites;
+                renderFavorites(favoritesData);
+            }
+        }).catch(err => {
+            console.error('Favorites loading failed:', err);
+        });
+    }
+
+    function renderFavorites(favorites) {
+        let items = sortItems(Object.values(favorites));
+        const totalCount = items.length;
+
+        // Apply search filter
+        if (searchQuery) {
+            items = items.filter(item => {
+                const title = (item.title || '').toLowerCase();
+                const site = (item.site || '').toLowerCase();
+                return title.includes(searchQuery) || site.includes(searchQuery);
+            });
+        }
+
+        // Update count text
+        if (searchQuery) {
+            countText.textContent = `${items.length} / ${totalCount} ürün eşleşiyor`;
+        } else {
+            countText.textContent = `${totalCount} adet kayıtlı ürün bulundu`;
+        }
+
+        // No favorites at all
+        if (totalCount === 0) {
+            emptyState.style.display = 'block';
+            container.style.display = 'none';
+            return;
+        }
+
+        // Has favorites but no search results
+        if (items.length === 0 && searchQuery) {
+            emptyState.style.display = 'none';
+            container.style.display = currentView === 'list' ? 'flex' : 'grid';
+            container.innerHTML = `
+            <div class="no-results">
+                <div class="no-results-icon">🔍</div>
+                <p>"<strong>${searchQuery}</strong>" için sonuç bulunamadı</p>
+            </div>
+        `;
+            return;
+        }
+
+        emptyState.style.display = 'none';
+        container.style.display = currentView === 'list' ? 'flex' : 'grid';
+
+        container.innerHTML = items.map(item => `
         <div class="favorite-card" data-id="${item.id}">
             <button class="delete-btn" data-id="${item.id}" title="Listeden Kaldır">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
@@ -92,35 +193,57 @@ function renderFavorites(favorites) {
         </div>
     `).join('');
 
-    // Attach Delete Events
-    container.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const id = btn.dataset.id;
-            if (confirm('Bu ürünü favorilerinizden kaldırmak istediğinize emin misiniz?')) {
-                api.runtime.sendMessage({ action: "REMOVE_FAVORITE", id }).then(() => {
-                    loadFavorites();
-                });
-            }
+        // Attach Delete Events
+        container.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.dataset.id;
+                if (confirm('Bu ürünü favorilerinizden kaldırmak istediğinize emin misiniz?')) {
+                    api.runtime.sendMessage({ action: "REMOVE_FAVORITE", id }).then(() => {
+                        loadFavorites();
+                    });
+                }
+            });
         });
-    });
-}
+    }
 
-function getSiteEmoji(site) {
-    if (!site) return '📦';
-    const s = site.toLowerCase();
-    if (s.includes('amazon')) return '🅰️';
-    if (s.includes('trendyol')) return '🟠';
-    if (s.includes('hepsiburada')) return '🛍️';
-    return '📦';
-}
+    function getSiteEmoji(site) {
+        if (!site) return '📦';
+        const s = site.toLowerCase();
+        if (s.includes('amazon')) return '🅰️';
+        if (s.includes('trendyol')) return '🟠';
+        if (s.includes('hepsiburada')) return '🛍️';
+        return '📦';
+    }
 
-function formatDate(timestamp) {
-    if (!timestamp) return 'Bilinmiyor';
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('tr-TR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    });
-}
+    function formatDate(timestamp) {
+        if (!timestamp) return 'Bilinmiyor';
+        const date = new Date(timestamp);
+        return date.toLocaleDateString('tr-TR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    }
+
+    function sortItems(items) {
+        switch (currentSort) {
+            case 'date-desc':
+                return items.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+            case 'date-asc':
+                return items.sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0));
+            case 'name-asc':
+                return items.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'tr'));
+            case 'name-desc':
+                return items.sort((a, b) => (b.title || '').localeCompare(a.title || '', 'tr'));
+            case 'site':
+                return items.sort((a, b) => {
+                    const siteCompare = (a.site || '').localeCompare(b.site || '', 'tr');
+                    if (siteCompare !== 0) return siteCompare;
+                    return (b.addedAt || 0) - (a.addedAt || 0); // Same site: sort by date
+                });
+            default:
+                return items;
+        }
+    }
+});

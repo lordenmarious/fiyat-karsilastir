@@ -1,4 +1,4 @@
-// Background script for Hover Price Extension v2.2
+// Background script for Fiyat Karşılaştır v2.3
 // Cross-browser compatible (Firefox & Chrome)
 
 // Cross-browser API
@@ -29,6 +29,21 @@ async function saveFavorites() {
 
 // Initialize
 loadFavorites();
+
+// Show onboarding page on first install
+api.runtime.onInstalled.addListener((details) => {
+    if (details.reason === 'install') {
+        // First time installation - show onboarding
+        api.storage.local.get({ onboardingSeen: false }).then((result) => {
+            if (!result.onboardingSeen) {
+                api.tabs.create({ url: api.runtime.getURL('onboarding.html') });
+            }
+        });
+    } else if (details.reason === 'update') {
+        // Extension updated - optionally show what's new
+        console.log('Fiyat Karşılaştır updated to v2.3');
+    }
+});
 
 // Handle keyboard shortcut (Alt+A)
 api.commands.onCommand.addListener((command) => {
@@ -95,4 +110,4 @@ function generateId(title) {
     return 'fav_' + Math.abs(hash).toString(36);
 }
 
-console.log("Hover Price background script loaded v2.2 (cross-browser)");
+console.log("Fiyat Karşılaştır background script loaded v2.3 (cross-browser)");
