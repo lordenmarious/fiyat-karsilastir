@@ -30,6 +30,27 @@ function debounce(fn, delay) {
     };
 }
 
+// Security Helpers
+function escapeHtml(unsafe) {
+    if (unsafe == null) return "";
+    return unsafe
+        .toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function safeUrl(url) {
+    if (!url) return '#';
+    const s = url.toString().toLowerCase();
+    if (s.startsWith('http://') || s.startsWith('https://')) {
+        return escapeHtml(url);
+    }
+    return '#';
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     loadSettings();
@@ -171,23 +192,23 @@ document.addEventListener('DOMContentLoaded', () => {
         container.style.display = currentView === 'list' ? 'flex' : 'grid';
 
         container.innerHTML = items.map(item => `
-        <div class="favorite-card" data-id="${item.id}">
-            <button class="delete-btn" data-id="${item.id}" title="Listeden Kaldır" aria-label="${item.title} favorilerden kaldır">
+        <div class="favorite-card" data-id="${escapeHtml(item.id)}">
+            <button class="delete-btn" data-id="${escapeHtml(item.id)}" title="Listeden Kaldır" aria-label="${escapeHtml(item.title)} favorilerden kaldır">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
             </button>
             <div class="card-icon">
-                ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.title}" onerror="this.onerror=null; this.parentElement.innerHTML='${getSiteEmoji(item.site)}';">` : getSiteEmoji(item.site)}
+                ${item.imageUrl ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" onerror="this.onerror=null; this.parentElement.innerHTML='${getSiteEmoji(item.site)}';">` : getSiteEmoji(item.site)}
             </div>
             <div class="card-content">
-                <div class="card-title" title="${item.title}">${item.title}</div>
+                <div class="card-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
                 <div class="card-meta">
-                    <span class="site-tag">${item.site}</span>
+                    <span class="site-tag">${escapeHtml(item.site)}</span>
                     <span class="dot">•</span>
                     <span class="date-tag">${formatDate(item.addedAt)}</span>
                 </div>
                 <div class="card-actions">
                     <a href="https://www.akakce.com/arama/?q=${encodeURIComponent(item.searchQuery)}" target="_blank" class="action-btn btn-compare">Fiyat Karşılaştır</a>
-                    <a href="${item.url}" target="_blank" class="action-btn btn-store">Ürün Sayfası</a>
+                    <a href="${safeUrl(item.url)}" target="_blank" class="action-btn btn-store">Ürün Sayfası</a>
                 </div>
             </div>
         </div>
