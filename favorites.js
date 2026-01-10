@@ -97,8 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
         currentView = view;
         container.className = `${view}-container`;
 
-        listViewBtn.classList.toggle('active', view === 'list');
-        gridViewBtn.classList.toggle('active', view === 'grid');
+        const isList = view === 'list';
+        listViewBtn.classList.toggle('active', isList);
+        gridViewBtn.classList.toggle('active', !isList);
+
+        listViewBtn.setAttribute('aria-pressed', isList);
+        gridViewBtn.setAttribute('aria-pressed', !isList);
 
         api.storage.local.set({ favoritesView: view });
         renderFavorites(favoritesData);

@@ -80,6 +80,18 @@
             transform: translateY(-1px);
         }
 
+        .menu-button:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(6, 78, 59, 0.2);
+            border-color: var(--primary);
+        }
+
+        .menu-button:active {
+            transform: scale(0.98);
+            background: #e5e7eb;
+        }
+
         .menu-button .icon-box {
             display: flex;
             align-items: center;
@@ -108,10 +120,10 @@
 
     <button id="open-favorites" class="menu-button">
         <div class="icon-box">
-            <span class="star">⭐</span>
+            <span class="star" aria-hidden="true">⭐</span>
             <span>Favorilerim</span>
         </div>
-        <span>→</span>
+        <span aria-hidden="true">→</span>
     </button>
 
     <div class="footer">
