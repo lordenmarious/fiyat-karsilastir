@@ -186,28 +186,38 @@
         // Optimization: Reduces memory usage and CPU overhead during DOM mutations (infinite scroll)
 
         document.body.addEventListener('mouseover', (e) => {
+            // Optimization: If we are already hovering the current item, ignore.
+            // This avoids expensive closest() calls when moving mouse *within* the same card.
+            if (lastHoveredDOMElement && lastHoveredDOMElement.contains(e.target)) return;
+
             const item = e.target.closest(config.listingItem);
             if (!item) return;
 
             // Handle enter
             if (item !== lastHoveredDOMElement) {
+                if (lastHoveredDOMElement) {
+                    handleMouseLeave(lastHoveredDOMElement);
+                }
                 lastHoveredDOMElement = item;
                 handleMouseEnter(item);
             }
         });
 
         document.body.addEventListener('mouseout', (e) => {
-            const item = e.target.closest(config.listingItem);
-            if (!item) return;
+            // Optimization: If we aren't tracking an item, we don't care about mouseout.
+            if (!lastHoveredDOMElement) return;
 
-            // Handle leave
-            // We only leave if the relatedTarget (where mouse went) is NOT inside the item
-            if (!item.contains(e.relatedTarget)) {
-                if (item === lastHoveredDOMElement) {
-                    handleMouseLeave(item);
-                    lastHoveredDOMElement = null;
-                }
-            }
+            // Optimization: Check if we are still inside the tracked item.
+            // e.target is the element we left. If it's not part of the tracked item, ignore.
+            if (!lastHoveredDOMElement.contains(e.target)) return;
+
+            // Optimization: Check if we moved to something that is STILL inside the tracked item.
+            // e.relatedTarget is where the mouse went.
+            if (lastHoveredDOMElement.contains(e.relatedTarget)) return;
+
+            // If we are here, we genuinely left the tracked item.
+            handleMouseLeave(lastHoveredDOMElement);
+            lastHoveredDOMElement = null;
         });
     }
 
