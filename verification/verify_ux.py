@@ -1,52 +1,76 @@
-
 from playwright.sync_api import sync_playwright
 import os
+import time
 
-def run():
+def test_delete_button_focus_visibility():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context()
-        page = context.new_page()
+        page = browser.new_page()
 
-        # Get absolute path to popup.html
-        cwd = os.getcwd()
-        popup_path = f'file://{cwd}/popup.html'
-        favorites_path = f'file://{cwd}/favorites.html'
+        file_path = os.path.abspath("favorites.html")
+        page.goto(f"file://{file_path}")
 
-        print(f'Navigating to {popup_path}')
-        page.goto(popup_path)
+        mock_html = """
+        <div class="favorite-card" data-id="1" tabindex="0">
+            <button class="delete-btn" data-id="1" title="Listeden Kaldır" aria-label="Test Ürün favorilerden kaldır">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            </button>
+            <div class="card-icon">📦</div>
+            <div class="card-content">
+                <div class="card-title">Test Ürün</div>
+            </div>
+        </div>
+        """
 
-        # Verify popup.html focus state
-        # Focus on the menu button
-        page.focus('#open-favorites')
-        page.screenshot(path='verification/popup_focus.png')
-        print('Captured popup focus state')
+        page.evaluate(f"""
+            document.getElementById('favorites-container').innerHTML = `{mock_html}`;
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('favorites-container').style.display = 'flex';
+        """)
 
-        print(f'Navigating to {favorites_path}')
-        page.goto(favorites_path)
+        delete_btn = page.locator(".delete-btn")
 
-        # Verify favorites.html view toggle aria attributes
-        list_btn = page.locator('#list-view-btn')
-        grid_btn = page.locator('#grid-view-btn')
+        # Click on body to reset focus
+        page.locator("body").click()
 
-        # Initial state (List view)
-        print(f'List Btn aria-pressed: {list_btn.get_attribute("aria-pressed")}')
-        print(f'Grid Btn aria-pressed: {grid_btn.get_attribute("aria-pressed")}')
+        # Tab into the button.
+        # First tab might go to address bar or something, or the first focusable element.
+        # We have buttons in header.
+        # Let's force focus via keyboard?
+        # Alternatively, we can force the state via CSS for testing or just trust focus().
 
-        # Click Grid View
-        grid_btn.click()
+        # NOTE: focus() usually triggers :focus, but :focus-visible depends on heuristics.
+        # Chrome usually treats script focus as NOT :focus-visible.
+        # But keyboard navigation triggers it.
 
-        # Verify state change
-        print(f'List Btn aria-pressed (after click): {list_btn.get_attribute("aria-pressed")}')
-        print(f'Grid Btn aria-pressed (after click): {grid_btn.get_attribute("aria-pressed")}')
+        # Let's try to tab until we hit it.
+        # But we don't know how many tabs.
 
-        # Check decorative icons aria-hidden
-        icon_span = page.locator('#list-view-btn span').first
-        print(f'Icon aria-hidden: {icon_span.get_attribute("aria-hidden")}')
+        # Alternative: just use :focus in the CSS as well?
+        # "Always add a `:focus-visible` rule" was the learning.
+        # But strictly speaking, if I use mouse to click, I might not want the ring.
+        # But for the DELETE button, it is hidden. So if I click it (blindly?), it should appear?
+        # Well, I can't click it if it is invisible and 0 opacity usually prevents clicks?
+        # Actually opacity 0 elements ARE clickable.
+        # So if I click it, it should probably appear.
 
-        page.screenshot(path='verification/favorites_grid.png')
+        # To make it easier to test and safer, maybe I should include `:focus` as well?
+        # But `:focus-visible` is the modern standard for "keyboard focus".
+
+        # Let's try to simulate key press.
+        delete_btn.focus()
+        page.keyboard.press("Tab") # Tab away?
+        page.keyboard.press("Shift+Tab") # Tab back?
+
+        # Wait for transition
+        time.sleep(0.5)
+
+        focused_opacity = delete_btn.evaluate("el => getComputedStyle(el).opacity")
+        print(f"Focused Opacity: {focused_opacity}")
+
+        page.screenshot(path="verification/delete_btn_focus.png")
 
         browser.close()
 
-if __name__ == '__main__':
-    run()
+if __name__ == "__main__":
+    test_delete_button_focus_visibility()
